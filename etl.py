@@ -10,13 +10,13 @@ def extract():
 
 def transform(df):
     """Clean and standardize data."""
-    print("\n🔹 Starting Transformation...")
+    print("\n Starting Transformation...")
 
     # Original stats
-    print(f"📊 Original Rows: {len(df)}")
-    print(f"📊 Original Columns: {list(df.columns)}")
+    print(f" Original Rows: {len(df)}")
+    print(f" Original Columns: {list(df.columns)}")
 
-    # Strip whitespace
+    # Strips the  whitespace
     for col in ["product_name", "product_url", "seller_name", "location", "price_text"]:
         if col in df.columns:
             df[col] = df[col].astype(str).str.strip()
@@ -44,10 +44,10 @@ def transform(df):
     before = len(df)
     df = df.drop_duplicates(subset=["product_url"])
     after = len(df)
-    print(f"🧹 Removed {before - after} duplicate rows")
+    print(f" Removed {before - after} duplicate rows")
 
     # Missing value summary
-    print("\n📉 Missing Values:")
+    print("\n Missing Values:")
     print(df.isna().sum())
 
     return df
@@ -55,8 +55,8 @@ def transform(df):
 def load(df):
     """Save cleaned data to CSV."""
     df.to_csv(OUTPUT_FILE, index=False)
-    print(f"\n✅ Cleaned data saved to {OUTPUT_FILE}")
-    print(f"📊 Final Rows: {len(df)} | Columns: {list(df.columns)}")
+    print(f"\n Cleaned data saved to {OUTPUT_FILE}")
+    print(f" Final Rows: {len(df)} | Columns: {list(df.columns)}")
 
 if __name__ == "__main__":
     df_raw = extract()

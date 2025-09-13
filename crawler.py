@@ -1,18 +1,5 @@
 #!/usr/bin/env python3
-"""
-Robust IndiaMART scraper (single master CSV output)
 
-Usage examples:
-  # interactive (asks for keyword & pages)
-  python crawler.py
-
-  # command-line
-  python crawler.py --keyword furniture --pages 3
-
-Outputs:
-  - data/products.csv (master; appended; deduped by product_url)
-  - data/page_{keyword}_{page}.html (saved raw HTML for debugging)
-"""
 
 import os
 import re
@@ -25,7 +12,7 @@ from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 import pandas as pd
 
-# ---- CONFIG ----
+
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
 POLITE_DELAY = 1.8
 DATA_DIR = "data"
@@ -45,7 +32,7 @@ def find_product_anchor_candidates(soup):
     anchors = []
     for a in soup.find_all("a", href=True):
         href = a["href"]
-        # heuristics: proddetail, cardlinks class or long product URLs
+        
         cls = " ".join(a.get("class", [])).lower() if a.get("class") else ""
         if ("proddetail" in href.lower()
                 or "proddetail" in cls
@@ -62,7 +49,7 @@ def get_ancestor_with_fields(a_tag, max_up=6):
         node = node.parent
         if node is None:
             break
-        # heuristics for product block
+        
         if node.select_one("p.price") or node.select_one("div.companyname") \
            or node.select_one("div.newLocationUi") or node.select_one("span.highlight") \
            or node.select_one("div.supplierInfoDiv") or node.select_one("p.prc") or node.select_one("div.card"):
@@ -87,7 +74,7 @@ def load_existing_urls(csv_path):
         return set()
     try:
         df = pd.read_csv(csv_path, dtype=str, keep_default_na=False)
-        # find a URL-like column
+        # finding a URL-like column
         url_col = None
         for c in df.columns:
             if "url" in c.lower() or "link" in c.lower() or "href" in c.lower():
@@ -95,7 +82,7 @@ def load_existing_urls(csv_path):
                 break
         if url_col:
             return set(df[url_col].dropna().astype(str).unique())
-        # fallback: scan all columns for values that look like product urls
+        # fallback: it scan all columns for values that look like product urls
         urls = set()
         for c in df.columns:
             sample = df[c].dropna().astype(str)
@@ -109,7 +96,7 @@ def load_existing_urls(csv_path):
 
 
 def extract_from_block(a, block, base_url):
-    # Title
+    # title
     title = clean_text(a) or a.get("title") or a.get("aria-label") or None
 
     # URL
@@ -205,7 +192,7 @@ def scrape_page(keyword, page_num, seen_urls):
         block = get_ancestor_with_fields(a, max_up=6)
         rec = extract_from_block(a, block, resp.url)
         rec["keyword"] = keyword
-        # product_url may be None sometimes; skip those
+        # product_url may be None sometimes, it will skip those
         if not rec["product_url"]:
             continue
         rows.append(rec)
@@ -251,12 +238,12 @@ def main(keyword=None, pages=3):
             print("No new rows from this page.")
         time.sleep(POLITE_DELAY)
 
-    # summary
+    
     try:
         df = pd.read_csv(MASTER_CSV)
-        print("\n📊 Master CSV row count:", len(df))
+        print("\n Master CSV row count:", len(df))
     except Exception:
-        print("\n📊 Master CSV updated (open file to check).")
+        print("\n Master CSV updated (open file to check).")
 
 
 if __name__ == "__main__":
